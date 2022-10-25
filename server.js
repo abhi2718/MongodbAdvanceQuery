@@ -1,5 +1,8 @@
 const mongoose = require("mongoose"),
+  PublicMeme = require("./PublicMeme"),
+  PrivateMeme = require("./PrivateMeme"),
   User = require("./User");
+
 // local mongodb url ->  mongodb://localhost/dbname
 mongoose.connect(
   "mongodb+srv://abhishek123:abhishek123@cluster0.1kbo88a.mongodb.net/dbtest?retryWrites=true&",
@@ -93,6 +96,109 @@ const method6 = async () => {
     console.log("err --->", err.message);
   }
 };
-method6();
-//https://www.youtube.com/watch?v=DZBGEVgL2eE
-// find({age:23}) => if no record is found than it will return []
+
+const usersArr = [{
+  name:"User1",
+  email:"abhi123@gmail.com",
+  age:23,
+},
+{
+  name:"User2",
+  email:"abhi123@gmail.com",
+  age:20,
+},
+{
+  name:"User3",
+  email:"abhi123@gmail.com",
+  age:35,
+},
+{
+  name:"User4",
+  email:"abhi123@gmail.com",
+  age:10,
+}]
+const insert = async()=>{
+  try{
+    const users = await User.create(usersArr);
+    console.log('users created --->',users);
+  }catch(e){
+    console.log('err -->',e);
+  }
+}
+//insert();
+const filterDocument = async()=>{
+  const pipeline = [
+    {
+      $match:{
+        age:{
+          $gt:10
+        },
+        name:{
+          $eq:"Abhishek Singh"
+        }
+      }
+    },
+    {
+      $group:{
+        "_id":"$name",
+      }
+    }
+  ];
+  const result = await User.aggregate(pipeline);
+  console.log('result --->',result);
+}
+// filterDocument();
+
+const _publicMeme = [
+  {
+    name:"meme1"
+  },
+  {
+    name:"meme2"
+  },
+  {
+    name:"meme3"
+  },
+  {
+    name:"meme4"
+  },
+  {
+    name:"meme5"
+  },
+]
+const createPublicMeme = async()=>{
+  const memes = await PublicMeme.create(_publicMeme);
+  console.log(memes)
+}
+//createPublicMeme()
+const createPrivateMeme = async()=>{
+  const _privateMeme = [
+    {
+      memeRef:"6357961aa5ecd0bcb05c067c"
+    },
+    {
+      memeRef:"6357961aa5ecd0bcb05c067d"
+    }
+  ]
+  const memes = await PrivateMeme.create(_privateMeme);
+  console.log(memes)
+}
+//createPrivateMeme()
+
+const filterPublicMeme =  async()=>{
+  const privateMeme =  await PrivateMeme.aggregate([
+    {
+      $group:{
+        _id:"$memeRef"
+      }
+    }
+  ]);
+ const publicMeme = await PublicMeme.find({
+  _id:{
+    $nin:privateMeme
+  }
+ }).limit('4')
+  console.log(publicMeme);
+}
+filterPublicMeme();
+
